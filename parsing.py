@@ -77,7 +77,7 @@ if __name__ == "__main__":
         if not os.path.isdir(out_dir):
             os.mkdir(out_dir)
         if t is not None:
-            t.to_excel(os.path.join(out_dir, f'{i}_{t.shape[0]}x{t.shape[1]}.xlsx'))
+            t.to_excel(os.path.join(out_dir, f'{i}_{t.shape[0]}x{t.shape[1]}.xlsx'), index=False)
             write_success = True
     if write_success:
         print(f"Wrote files {[i for i, t in enumerate(tables) if t is not None]} in directory {out_dir}.")
