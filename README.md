@@ -1,1 +1,3 @@
-# html-to-table: Parsing tables in html files with pandas.
+# html-to-table:
+
+Parsing tables in html files with pandas.
