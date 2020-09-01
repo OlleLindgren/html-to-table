@@ -1,29 +1,47 @@
 import pandas as pd 
 import os 
+import re
 
-html_file_dir = r'C:\Users\lindg\Documents\tma947 Nonlinear Optimization\tma_course_page.html'
-out_dir = r'C:\Users\lindg\Documents\tma947 Nonlinear Optimization\tma_course_page_table_parse'
+def parse_table(in_dir, out_file):
 
-tab_name = 'table'
-tab_row_name = 'tr'
-tab_elem_name = 'td'
-tab_colname_name = 'th'
+    # Read HTML file in in_dir, write tables as sheets in out_file.
 
-colnames = None
-tab_start = None
-tab_end = None
+    tables = []
+    writing = False
+    writing_row = False
+    writing_entry = False
 
-tables = []
-writing = False
-writing_row = False
-writing_entry = False
+    writing_page_name = False
+    page_name = None
 
-if __name__ == "__main__":
-    with open(html_file_dir, 'r', encoding='UTF-8') as f:
+    garbage_phrases = ['&nbsp;']
+
+    with open(in_dir, 'r', encoding='UTF-8') as f:
 
         for i, l in enumerate(f.readlines()):
+            
+            for g in garbage_phrases:
+                l = l.replace(g, '')
+            l = l.strip()
 
-            l = l.replace('&nbsp;', '').strip()
+            if '<title' in l:
+                writing_page_name = True
+                page_name = ''
+                level=0
+            
+            if writing_page_name:
+                for ch in l.strip():
+                    if ch == '<':
+                        level += 1
+                    elif ch == '>':
+                        level -= 1
+                    elif level == 0:
+                        page_name += ch
+            
+            if '</title' in l:
+                writing_page_name = False
+                # Delete non-alphanumeric
+                page_name = re.sub(r'\W+', '', page_name)
 
             if writing:
                 # Check for table end
@@ -73,13 +91,21 @@ if __name__ == "__main__":
                 current_has_header = False
 
     write_success = False
+
+    out_file = out_file.format('results' if page_name is None else page_name)
+
+    writer = pd.ExcelWriter(out_file, engine='xlsxwriter')
     for i, t in enumerate(tables):
-        if not os.path.isdir(out_dir):
-            os.mkdir(out_dir)
         if t is not None:
-            t.to_excel(os.path.join(out_dir, f'{i}_{t.shape[0]}x{t.shape[1]}.xlsx'), index=False)
+            t.to_excel(writer, sheet_name=f'{i}_{t.shape[0]}x{t.shape[1]}', index=False)
             write_success = True
     if write_success:
-        print(f"Wrote files {[i for i, t in enumerate(tables) if t is not None]} in directory {out_dir}.")
+        writer.save()
+        print(f"Wrote files {[i for i, t in enumerate(tables) if t is not None]} to file {out_file}.")
     else:
         print(f"No file was successfully written.")
+
+if __name__ == "__main__":
+    parse_table(
+        in_dir=r'C:\Users\lindg\Documents\tma947 Nonlinear Optimization\tma_course_page.html',
+        out_file=r'C:\Users\lindg\Documents\tma947 Nonlinear Optimization\tma_course_page_table_parse\{}.xlsx')
