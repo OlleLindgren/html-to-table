@@ -18,7 +18,7 @@ def html_to_table(in_dir, out_file):
 
     with open(in_dir, 'r', encoding='UTF-8') as f:
 
-        for i, l in enumerate(f.readlines()):
+        for i, l in enumerate(f.read().replace('<', '\n<').split('\n')):
             
             for g in garbage_phrases:
                 l = l.replace(g, '')
@@ -107,5 +107,5 @@ def html_to_table(in_dir, out_file):
 
 if __name__ == "__main__":
     html_to_table(
-        in_dir=r'C:\Users\lindg\Documents\tma947 Nonlinear Optimization\tma_course_page.html',
-        out_file=r'C:\Users\lindg\Documents\tma947 Nonlinear Optimization\tma_course_page_table_parse\{}.xlsx')
+        in_dir=r'C:\Users\lindg\Documents\healthy\data\nutrition\Rekommenderat dagligt intag – Wikipedia.html',
+        out_file=r'C:\Users\lindg\Documents\healthy\data\nutrition\{}.xlsx')
