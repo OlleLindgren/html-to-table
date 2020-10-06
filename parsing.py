@@ -2,7 +2,7 @@ import pandas as pd
 import os 
 import re
 
-def parse_table(in_dir, out_file):
+def html_to_table(in_dir, out_file):
 
     # Read HTML file in in_dir, write tables as sheets in out_file.
 
@@ -106,6 +106,6 @@ def parse_table(in_dir, out_file):
         print(f"No file was successfully written.")
 
 if __name__ == "__main__":
-    parse_table(
+    html_to_table(
         in_dir=r'C:\Users\lindg\Documents\tma947 Nonlinear Optimization\tma_course_page.html',
         out_file=r'C:\Users\lindg\Documents\tma947 Nonlinear Optimization\tma_course_page_table_parse\{}.xlsx')
