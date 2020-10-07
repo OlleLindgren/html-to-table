@@ -24,7 +24,7 @@ def html_to_table(in_dir, out_file):
                 l = l.replace(g, '')
             l = l.strip()
 
-            if '<title' in l:
+            if '<title' in l and page_name is None:
                 writing_page_name = True
                 page_name = ''
                 level=0
@@ -107,5 +107,5 @@ def html_to_table(in_dir, out_file):
 
 if __name__ == "__main__":
     html_to_table(
-        in_dir=r'C:\Users\lindg\Documents\healthy\data\nutrition\Rekommenderat dagligt intag – Wikipedia.html',
-        out_file=r'C:\Users\lindg\Documents\healthy\data\nutrition\{}.xlsx')
+        in_dir=r'C:\Users\lindg\Documents\healthy\data\recipes\Pasta med världens godaste köttfärssås.html',
+        out_file=r'C:\Users\lindg\Documents\healthy\data\recipes\{}.xlsx')
