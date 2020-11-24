@@ -9,7 +9,7 @@ xlwt
 ```
 
 ## Install
-`pip install git+https://github.com/OlleLindgren/html-to-table@v0.0.1`
+`pip install git+https://github.com/OlleLindgren/html-to-table@v0.1`
 
 ## Usage: Parsing .html files
 
