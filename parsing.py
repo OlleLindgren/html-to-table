@@ -1,10 +1,22 @@
 import pandas as pd 
 import os 
 import re
+import requests
+from lxml import html
+import tempfile
 
-def html_to_table(in_dir, out_file):
+def get_htmlfile(in_dir):
+    # Get html from html file
+    with open(in_dir, 'r', encoding='UTF-8') as f:
+        return f.read()
 
-    # Read HTML file in in_dir, write tables as sheets in out_file.
+def get_webpage(url):
+    # Get html from webpage URL
+    return requests.get(url).text
+
+def parse_html(html_string):
+
+    # Read HTML file in in_dir, return as a list of tables in pd.DataFrame form.
 
     tables = []
     writing = False
@@ -16,96 +28,110 @@ def html_to_table(in_dir, out_file):
 
     garbage_phrases = ['&nbsp;']
 
-    with open(in_dir, 'r', encoding='UTF-8') as f:
+    for _, l in enumerate(html_string.replace('<', '\n<').split('\n')):
+        
+        for g in garbage_phrases:
+            l = l.replace(g, '')
+        l = l.strip()
 
-        for i, l in enumerate(f.read().replace('<', '\n<').split('\n')):
-            
-            for g in garbage_phrases:
-                l = l.replace(g, '')
-            l = l.strip()
+        if '<title' in l and page_name is None:
+            writing_page_name = True
+            page_name = ''
+            level=0
+        
+        if writing_page_name:
+            for ch in l.strip():
+                if ch == '<':
+                    level += 1
+                elif ch == '>':
+                    level -= 1
+                elif level == 0:
+                    page_name += ch
+        
+        if '</title' in l:
+            writing_page_name = False
+            # Delete non-alphanumeric
+            page_name = re.sub(r'\W+', '', page_name)
 
-            if '<title' in l and page_name is None:
-                writing_page_name = True
-                page_name = ''
-                level=0
-            
-            if writing_page_name:
-                for ch in l.strip():
-                    if ch == '<':
-                        level += 1
-                    elif ch == '>':
-                        level -= 1
-                    elif level == 0:
-                        page_name += ch
-            
-            if '</title' in l:
-                writing_page_name = False
-                # Delete non-alphanumeric
-                page_name = re.sub(r'\W+', '', page_name)
+        if writing:
+            # Check for table end
+            if '</table' in l:
+                try:
+                    result = pd.DataFrame(columns=rows[0], data=rows[1:]) if current_has_header else pd.DataFrame(data=rows)
+                    tables.append(result)
+                except ValueError:
+                    tables.append(None)
+                writing = False
+                continue
 
-            if writing:
-                # Check for table end
-                if '</table' in l:
-                    try:
-                        result = pd.DataFrame(columns=rows[0], data=rows[1:]) if current_has_header else pd.DataFrame(data=rows)
-                        tables.append(result)
-                    except ValueError:
-                        tables.append(None)
-                    writing = False
+            if writing_row:
+                # Check for row end
+                if '</tr' in l:
+                    rows.append(current_row)
+                    writing_row = False
                     continue
+                
+                if '<th' in l:
+                    current_has_header = True
+                
+                if '<th' in l or '<td' in l:
+                    writing_entry = True
+                    level = 0
+                    entry_result = ''
 
-                if writing_row:
-                    # Check for row end
-                    if '</tr' in l:
-                        rows.append(current_row)
-                        writing_row = False
-                        continue
-                    
-                    if '<th' in l:
-                        current_has_header = True
-                    
-                    if '<th' in l or '<td' in l:
-                        writing_entry = True
-                        level = 0
-                        entry_result = ''
+                if writing_entry:
+                    for ch in l.strip():
+                        if ch == '<':
+                            level += 1
+                        elif ch == '>':
+                            level -= 1
+                        elif level == 0:
+                            entry_result += ch
+                
+                if '</th' in l or '</td' in l:
+                    writing_entry = False
+                    current_row.append(entry_result.strip())
+                
+            elif '<tr' in l:
+                current_row = []
+                writing_row = True
+        elif '<table' in l:
+            rows = []
+            writing = True
+            current_has_header = False
 
-                    if writing_entry:
-                        for ch in l.strip():
-                            if ch == '<':
-                                level += 1
-                            elif ch == '>':
-                                level -= 1
-                            elif level == 0:
-                                entry_result += ch
-                    
-                    if '</th' in l or '</td' in l:
-                        writing_entry = False
-                        current_row.append(entry_result.strip())
-                    
-                elif '<tr' in l:
-                    current_row = []
-                    writing_row = True
-            elif '<table' in l:
-                rows = []
-                writing = True
-                current_has_header = False
+    return page_name, tables
 
-    write_success = False
+def write_excel(filename, tables):
+    success = False
 
-    out_file = out_file.format('results' if page_name is None else page_name)
-
-    writer = pd.ExcelWriter(out_file, engine='xlsxwriter')
-    for i, t in enumerate(tables):
-        if t is not None:
-            t.to_excel(writer, sheet_name=f'{i}_{t.shape[0]}x{t.shape[1]}', index=False)
-            write_success = True
-    if write_success:
-        writer.save()
-        print(f"Wrote files {[i for i, t in enumerate(tables) if t is not None]} to file {out_file}.")
-    else:
-        print(f"No file was successfully written.")
+    with pd.ExcelWriter(filename, engine='xlsxwriter') as writer:
+        for i, t in enumerate(tables):
+            if t is not None:
+                t.to_excel(writer, sheet_name=f'{i}_{t.shape[0]}x{t.shape[1]}', index=False)
+                success = True
+        if success:
+            writer.save()
+    return success
 
 if __name__ == "__main__":
-    html_to_table(
-        in_dir=r'C:\Users\lindg\Documents\healthy\data\recipes\Pasta med världens godaste köttfärssås.html',
-        out_file=r'C:\Users\lindg\Documents\healthy\data\recipes\{}.xlsx')
+    # source = r'https://www.bbc.com/news/election/us2020/results'
+    # html_string = get_webpage(source)
+
+    source = r'inputs/election.html'
+
+    html_string = get_htmlfile(source)
+
+    pagename, tables = parse_html(html_string)
+
+    filename = f'results/{pagename or "results"}.xlsx'
+
+    success = write_excel(filename, tables)
+    
+    if success:
+        print(f"Wrote files {[i for i, t in enumerate(tables) if t is not None]} to file {filename}.")
+    else:
+        if len(tables) == 0:
+            print(f'No tables found in {source}')
+        else:
+            print(f"{len(tables)} tables were found, but excel write failed.") 
