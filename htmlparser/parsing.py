@@ -1,9 +1,6 @@
 import pandas as pd 
-import os 
 import re
 import requests
-from lxml import html
-import tempfile
 
 def get_htmlfile(in_dir):
     # Get html from html file
