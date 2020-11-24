@@ -11,7 +11,7 @@ xlwt
 ## Install
 `pip install git+https://github.com/OlleLindgren/html-to-table@v0.1`
 
-## Usage: Parsing .html files
+## Usage: Parsing html
 
 ```
 # Read from url
