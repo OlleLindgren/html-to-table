@@ -6,14 +6,18 @@ Repository for parsing html files as tables, and writing to excel files.
 python>=3.6
 pandas
 xlwt
+requests
+xlsxwriter
 ```
 
 ## Install
-`pip install git+https://github.com/OlleLindgren/html-to-table@v0.0.1`
+`pip install git+https://github.com/OlleLindgren/html-to-table@v0.1.1`
 
 ## Usage: Parsing .html files
 
 ```
+import htmlparser as prs
+
 # Read from url
 source_url = r'https://www.bbc.com/news/election/us2020/results'
 html_string = get_webpage(source_url)
