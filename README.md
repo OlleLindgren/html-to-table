@@ -1,5 +1,5 @@
 # html-to-table
-Repository for parsing html files as tables, and writing to excel files.
+Repository for parsing html files as tables (in pd.DataFrame format), and writing to excel files.
 
 ## Dependencies
 ```
@@ -13,7 +13,7 @@ xlsxwriter
 ## Install
 `pip install git+https://github.com/OlleLindgren/html-to-table@v0.1.1`
 
-## Usage: Parsing .html files
+## Usage: Parsing html
 
 ```
 import htmlparser as prs
