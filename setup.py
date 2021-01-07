@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="html-parsing", # Replace with your own username
-    version="0.1.1",
+    version="v0.1.1",
     author="Olle Lindgren",
     author_email="lindgrenolle@live.se",
     description="A package for parsing data from html",
