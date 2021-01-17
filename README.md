@@ -20,7 +20,7 @@ import htmlparser as prs
 
 # Read from url
 source_url = r'https://www.bbc.com/news/election/us2020/results'
-html_string = get_webpage(source_url)
+html_string = prs.get_webpage(source_url)
 
 # Read from downloaded file
 source_file = r'inputs/election.html'
