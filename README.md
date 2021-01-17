@@ -28,7 +28,7 @@ html_string = prs.get_htmlfile(source_file)
 
 # Parse html
 pagename, tables = prs.parse_html(html_string)
-filename = f'results/{pagename or "results"}.xlsx'
+filename = f'{pagename or "results"}.xlsx'
 
 # Write excel. Returns True if anything was written, False otherwise.
 success = prs.write_excel(filename, tables)
