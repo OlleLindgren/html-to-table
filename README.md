@@ -1,4 +1,7 @@
 # html-to-table
+
+This repository is no longer maintained, as a better version is available at https://github.com/fhightower/html-to-json.
+
 Repository for parsing html files as tables (in pd.DataFrame format), and writing to excel files.
 
 ## Dependencies
